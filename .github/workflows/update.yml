@@ -1,0 +1,37 @@
+name: Update MUX Token
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update-token:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run token fetch script
+      run: python fetch_token.py
+      env:
+        USER_EMAIL: ${{ secrets.USER_EMAIL }}
+        USER_ID: ${{ secrets.USER_ID }}
+        VIDEO_ID: ${{ secrets.VIDEO_ID }}
+
+    - name: Push updated token
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add stream_url.txt
+        git commit -m "Update MUX token"
+        git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/mdumarfaruksuk/LFCTV.git main
